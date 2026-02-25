@@ -1,3 +1,4 @@
+import { put } from '@vercel/blob';
 'use server';
 
 import fs from 'node:fs/promises';
@@ -40,13 +41,13 @@ export async function savePostAction(formData: FormData) {
   if (prev?.coverImage) coverImage = prev.coverImage;
 
   if (coverFile && typeof coverFile === 'object' && 'arrayBuffer' in coverFile && (coverFile as any).size > 0) {
-    const buf = Buffer.from(await coverFile.arrayBuffer());
     const ext = path.extname((coverFile as any).name || '').toLowerCase() || '.jpg';
-    const fname = `${Date.now()}-${safeFilename(slugify(title) || 'cover')}${ext}`;
-    const outDir = path.join(process.cwd(), 'public', 'uploads');
-    await fs.mkdir(outDir, { recursive: true });
-    await fs.writeFile(path.join(outDir, fname), buf);
-    coverImage = `/uploads/${fname}`;
+    const base = safeFilename(slugify(title) || 'cover');
+    const blob = await put(`covers/${base}${ext}`, coverFile as File, {
+      access: 'public',
+      addRandomSuffix: true,
+    });
+    coverImage = blob.url; // store full URL
   }
 
   const post = await upsertPost(id, {

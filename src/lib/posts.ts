@@ -1,5 +1,4 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import { sql } from '@vercel/postgres';
 import { estimateReadTimeMinutes, slugify } from './utils';
 
 export type PostStatus = 'published' | 'draft';
@@ -11,43 +10,23 @@ export type Post = {
   excerpt: string;
   category: string;
   tags: string[];
-  coverImage?: string; // /uploads/...
+  coverImage?: string;
   status: PostStatus;
-  publishedAt: string; // ISO date
-  content: string; // markdown
+  publishedAt: string; // YYYY-MM-DD
+  content: string;
 };
 
 export type PostInput = Omit<Post, 'id' | 'slug'> & { slug?: string };
 
-const DATA_PATH = path.join(process.cwd(), 'data', 'posts.json');
-
-async function ensureStore(): Promise<void> {
-  try {
-    await fs.access(DATA_PATH);
-  } catch {
-    await fs.mkdir(path.dirname(DATA_PATH), { recursive: true });
-    await fs.writeFile(DATA_PATH, JSON.stringify({ posts: [] }, null, 2), 'utf8');
-  }
-}
-
-async function readStore(): Promise<{ posts: Post[] }> {
-  await ensureStore();
-  const raw = await fs.readFile(DATA_PATH, 'utf8');
-  try {
-    const parsed = JSON.parse(raw);
-    return { posts: Array.isArray(parsed.posts) ? parsed.posts : [] };
-  } catch {
-    return { posts: [] };
-  }
-}
-
-async function writeStore(store: { posts: Post[] }): Promise<void> {
-  await fs.writeFile(DATA_PATH, JSON.stringify(store, null, 2), 'utf8');
-}
-
 export function withDerived(post: Post) {
   const minutes = estimateReadTimeMinutes(post.content);
   return { ...post, readTime: `${minutes} min read` };
+}
+
+function normalizeCategory(cat?: string) {
+  const c = (cat || '').trim().toLowerCase();
+  if (!c || c === 'all') return '';
+  return c;
 }
 
 export async function listPosts(opts?: {
@@ -56,83 +35,170 @@ export async function listPosts(opts?: {
   query?: string;
   sort?: 'newest' | 'oldest';
 }) {
-  const { posts } = await readStore();
   const includeDrafts = opts?.includeDrafts ?? false;
-  const category = (opts?.category || '').toLowerCase();
-  const q = (opts?.query || '').trim().toLowerCase();
+  const category = normalizeCategory(opts?.category);
+  const q = (opts?.query || '').trim();
+  const like = q ? `%${q}%` : '';
 
-  let filtered = posts.filter((p) => includeDrafts || p.status === 'published');
+  const order = (opts?.sort ?? 'newest') === 'oldest' ? 'ASC' : 'DESC';
 
-  if (category && category !== 'all') {
-    filtered = filtered.filter((p) => (p.category || '').toLowerCase() === category);
-  }
+  // Two queries only to keep ORDER BY simple & safe
+  const { rows } =
+    order === 'ASC'
+      ? await sql<Post>`
+          SELECT
+            id,
+            slug,
+            title,
+            excerpt,
+            category,
+            tags,
+            cover_image AS "coverImage",
+            status,
+            to_char(published_at, 'YYYY-MM-DD') AS "publishedAt",
+            content
+          FROM posts
+          WHERE (${includeDrafts} OR status = 'published')
+            AND (${category} = '' OR lower(category) = lower(${category}))
+            AND (
+              ${like} = '' OR
+              title ILIKE ${like} OR
+              excerpt ILIKE ${like} OR
+              content ILIKE ${like} OR
+              array_to_string(tags, ' ') ILIKE ${like}
+            )
+          ORDER BY published_at ASC;
+        `
+      : await sql<Post>`
+          SELECT
+            id,
+            slug,
+            title,
+            excerpt,
+            category,
+            tags,
+            cover_image AS "coverImage",
+            status,
+            to_char(published_at, 'YYYY-MM-DD') AS "publishedAt",
+            content
+          FROM posts
+          WHERE (${includeDrafts} OR status = 'published')
+            AND (${category} = '' OR lower(category) = lower(${category}))
+            AND (
+              ${like} = '' OR
+              title ILIKE ${like} OR
+              excerpt ILIKE ${like} OR
+              content ILIKE ${like} OR
+              array_to_string(tags, ' ') ILIKE ${like}
+            )
+          ORDER BY published_at DESC;
+        `;
 
-  if (q) {
-    filtered = filtered.filter((p) => {
-      const hay = `${p.title} ${p.excerpt} ${p.category} ${(p.tags || []).join(' ')} ${p.content}`.toLowerCase();
-      return hay.includes(q);
-    });
-  }
-
-  filtered.sort((a, b) => {
-    const da = new Date(a.publishedAt).getTime();
-    const db = new Date(b.publishedAt).getTime();
-    return (opts?.sort ?? 'newest') === 'newest' ? db - da : da - db;
-  });
-
-  return filtered.map(withDerived);
+  return rows.map(withDerived);
 }
 
 export async function getPostBySlug(slug: string, includeDrafts = false) {
-  const { posts } = await readStore();
-  const found = posts.find((p) => p.slug === slug && (includeDrafts || p.status === 'published'));
-  return found ? withDerived(found) : null;
+  const { rows } = await sql<Post>`
+    SELECT
+      id,
+      slug,
+      title,
+      excerpt,
+      category,
+      tags,
+      cover_image AS "coverImage",
+      status,
+      to_char(published_at, 'YYYY-MM-DD') AS "publishedAt",
+      content
+    FROM posts
+    WHERE slug = ${slug}
+      AND (${includeDrafts} OR status = 'published')
+    LIMIT 1;
+  `;
+  return rows[0] ? withDerived(rows[0]) : null;
 }
 
 export async function getPostById(id: string) {
-  const { posts } = await readStore();
-  const found = posts.find((p) => p.id === id);
-  return found ? withDerived(found) : null;
+  const { rows } = await sql<Post>`
+    SELECT
+      id,
+      slug,
+      title,
+      excerpt,
+      category,
+      tags,
+      cover_image AS "coverImage",
+      status,
+      to_char(published_at, 'YYYY-MM-DD') AS "publishedAt",
+      content
+    FROM posts
+    WHERE id = ${id}
+    LIMIT 1;
+  `;
+  return rows[0] ? withDerived(rows[0]) : null;
+}
+
+async function ensureUniqueSlug(id: string, baseSlug: string) {
+  const base = baseSlug || `post-${id}`;
+  let candidate = base;
+  let n = 2;
+
+  while (true) {
+    const { rows } = await sql`SELECT 1 FROM posts WHERE slug = ${candidate} AND id <> ${id} LIMIT 1;`;
+    if (rows.length === 0) return candidate;
+    candidate = `${base}-${n++}`;
+  }
 }
 
 export async function upsertPost(id: string, input: PostInput): Promise<Post> {
-  const store = await readStore();
-  const existingIndex = store.posts.findIndex((p) => p.id === id);
+  const baseSlug = (input.slug && input.slug.trim()) ? slugify(input.slug) : slugify(input.title);
+  const slug = await ensureUniqueSlug(id, baseSlug);
 
-  const finalSlug = (input.slug && input.slug.trim()) ? slugify(input.slug) : slugify(input.title);
+  const publishedAt = input.publishedAt || new Date().toISOString().slice(0, 10);
 
-  const base = finalSlug || `post-${id}`;
-  let slug = base;
-  let n = 2;
-  while (store.posts.some((p) => p.slug === slug && p.id !== id)) {
-    slug = `${base}-${n++}`;
-  }
+  const { rows } = await sql<Post>`
+    INSERT INTO posts (
+      id, slug, title, excerpt, category, tags, cover_image, status, published_at, content, updated_at
+    )
+    VALUES (
+      ${id},
+      ${slug},
+      ${input.title},
+      ${input.excerpt},
+      ${input.category},
+      ${(input.tags ?? []) as unknown as any},      ${input.coverImage || null},
+      ${input.status},
+      ${publishedAt}::date,
+      ${input.content},
+      now()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      slug = EXCLUDED.slug,
+      title = EXCLUDED.title,
+      excerpt = EXCLUDED.excerpt,
+      category = EXCLUDED.category,
+      tags = EXCLUDED.tags,
+      cover_image = EXCLUDED.cover_image,
+      status = EXCLUDED.status,
+      published_at = EXCLUDED.published_at,
+      content = EXCLUDED.content,
+      updated_at = now()
+    RETURNING
+      id,
+      slug,
+      title,
+      excerpt,
+      category,
+      tags,
+      cover_image AS "coverImage",
+      status,
+      to_char(published_at, 'YYYY-MM-DD') AS "publishedAt",
+      content;
+  `;
 
-  const post: Post = {
-    id,
-    slug,
-    title: input.title,
-    excerpt: input.excerpt,
-    category: input.category,
-    tags: input.tags,
-    coverImage: input.coverImage,
-    status: input.status,
-    publishedAt: input.publishedAt,
-    content: input.content,
-  };
-
-  if (existingIndex >= 0) {
-    store.posts[existingIndex] = post;
-  } else {
-    store.posts.unshift(post);
-  }
-
-  await writeStore(store);
-  return post;
+  return rows[0];
 }
 
 export async function deletePost(id: string): Promise<void> {
-  const store = await readStore();
-  store.posts = store.posts.filter((p) => p.id !== id);
-  await writeStore(store);
+  await sql`DELETE FROM posts WHERE id = ${id};`;
 }
