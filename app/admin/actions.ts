@@ -1,7 +1,6 @@
-import { put } from '@vercel/blob';
 'use server';
 
-import fs from 'node:fs/promises';
+import { put } from '@vercel/blob';
 import path from 'node:path';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
