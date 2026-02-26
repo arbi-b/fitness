@@ -3,7 +3,7 @@ import { listPosts } from '@/lib/posts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatDateISO } from '@/lib/utils';
-import { deletePostAction } from './actions';
+import { deletePostAction } from './delete-action';
 
 const btnPrimary =
   'inline-flex h-10 items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200';
@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
           <Link href="/admin/new" className={btnPrimary}>
             New post
           </Link>
-          <Link href="/api/admin/logout" className={btnSecondary}>
+          <Link href="/api/admin/logout" className={btnSecondary} prefetch={false}>
             Logout
           </Link>
         </div>
@@ -35,6 +35,7 @@ export default async function AdminDashboard() {
           <CardTitle>Posts</CardTitle>
           <CardDescription>{posts.length} total</CardDescription>
         </CardHeader>
+
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -47,29 +48,55 @@ export default async function AdminDashboard() {
                   <th className="py-2 pr-4">Actions</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-zinc-200/70 dark:divide-zinc-800/70">
                 {posts.map((p) => (
                   <tr key={p.id} className="align-top">
                     <td className="py-3 pr-4 min-w-[260px]">
                       <div className="font-medium">{p.title}</div>
-                      <div className="mt-0.5 text-xs text-zinc-600 dark:text-zinc-400 truncate max-w-[520px]">{p.excerpt}</div>
+                      <div className="mt-0.5 text-xs text-zinc-600 dark:text-zinc-400 truncate max-w-[520px]">
+                        {p.excerpt}
+                      </div>
                     </td>
+
                     <td className="py-3 pr-4">
                       <Badge variant={p.status === 'published' ? 'default' : 'secondary'} className="rounded-xl">
                         {p.status}
                       </Badge>
                     </td>
+
                     <td className="py-3 pr-4 capitalize">{p.category}</td>
+
                     <td className="py-3 pr-4 whitespace-nowrap">{formatDateISO(p.publishedAt)}</td>
+
                     <td className="py-3 pr-4">
                       <div className="flex flex-wrap gap-2">
-                        <Link prefetch={false} href={`/posts/${p.slug}`} className="text-sm hover:underline underline-offset-4">
-                          View
-                        </Link>
+                        {p.status === 'published' ? (
+                          <Link
+                            prefetch={false}
+                            href={`/posts/${p.slug}`}
+                            className="text-sm hover:underline underline-offset-4"
+                          >
+                            View
+                          </Link>
+                        ) : (
+                          <Link
+                            prefetch={false}
+                            href={`/admin/preview/${p.id}`}
+                            className="text-sm hover:underline underline-offset-4"
+                          >
+                            Preview
+                          </Link>
+                        )}
 
-                        <Link prefetch={false} href={`/admin/edit/${p.id}`} className="text-sm hover:underline underline-offset-4">
+                        <Link
+                          prefetch={false}
+                          href={`/admin/edit/${p.id}`}
+                          className="text-sm hover:underline underline-offset-4"
+                        >
                           Edit
                         </Link>
+
                         <form action={deletePostAction}>
                           <input type="hidden" name="id" value={p.id} />
                           <button className="text-sm text-red-600 hover:underline underline-offset-4">Delete</button>
@@ -82,12 +109,14 @@ export default async function AdminDashboard() {
             </table>
           </div>
 
-          {posts.length === 0 && <p className="text-sm text-zinc-600 dark:text-zinc-400">No posts yet. Create your first one.</p>}
+          {posts.length === 0 && (
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">No posts yet. Create your first one.</p>
+          )}
         </CardContent>
       </Card>
 
       <p className="mt-4 text-xs text-zinc-600 dark:text-zinc-400">
-        Storage is file-based: posts are saved to <code>data/posts.json</code> and cover images to <code>public/uploads</code>.
+        Posts are stored in the database, and cover images are stored in Blob storage.
       </p>
     </div>
   );
