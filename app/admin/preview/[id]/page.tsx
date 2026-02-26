@@ -9,7 +9,7 @@ import { getPostById } from '@/lib/posts';
 import { formatDateISO } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-export default async function AdminPreviewPage({ params }: { params: { id: string } }) {
+export default async function AdminPreviewPage({ params }: any) {
   const post = await getPostById(params.id);
   if (!post) notFound();
 
