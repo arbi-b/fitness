@@ -63,10 +63,11 @@ export default async function AdminDashboard() {
                     <td className="py-3 pr-4 whitespace-nowrap">{formatDateISO(p.publishedAt)}</td>
                     <td className="py-3 pr-4">
                       <div className="flex flex-wrap gap-2">
-                        <Link href={`/posts/${p.slug}`} className="text-sm hover:underline underline-offset-4">
+                        <Link prefetch={false} href={`/posts/${p.slug}`} className="text-sm hover:underline underline-offset-4">
                           View
                         </Link>
-                        <Link href={`/admin/edit/${p.id}`} className="text-sm hover:underline underline-offset-4">
+
+                        <Link prefetch={false} href={`/admin/edit/${p.id}`} className="text-sm hover:underline underline-offset-4">
                           Edit
                         </Link>
                         <form action={deletePostAction}>
