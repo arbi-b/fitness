@@ -9,7 +9,6 @@ export function SiteFooter() {
           <Link className="hover:text-zinc-900 dark:hover:text-white" href="/#posts">Posts</Link>
           <Link className="hover:text-zinc-900 dark:hover:text-white" href="/#topics">Topics</Link>
           <Link className="hover:text-zinc-900 dark:hover:text-white" href="/#newsletter">Newsletter</Link>
-          <Link className="hover:text-zinc-900 dark:hover:text-white" href="/admin">Admin</Link>
         </div>
       </div>
     </footer>

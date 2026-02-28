@@ -106,143 +106,151 @@ export default async function Home({
       </section>
 
       {/* Main */}
-      <section id="posts" className="pt-6 md:pt-8">
-        <div className="grid gap-6 md:grid-cols-12">
-          {/* Feed */}
-          <div className="md:col-span-8">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-2">
-                <ButtonLink href={makeQuery({ tab: 'latest' })} active={tab === 'latest'}>
-                  Latest
-                </ButtonLink>
-                <ButtonLink href={makeQuery({ tab: 'popular' })} active={tab === 'popular'} icon={<Flame className="mr-2 h-4 w-4" />}>
-                  Popular
-                </ButtonLink>
-                <ButtonLink href={makeQuery({ tab: 'research', cat: 'research' })} active={tab === 'research'} icon={<FlaskConical className="mr-2 h-4 w-4" />}>
-                  Research
-                </ButtonLink>
-              </div>
+      <section id="posts" className="pt-6 md:pt-8 overflow-x-hidden">
+        <div className="grid gap-6 md:grid-cols-12 min-w-0 max-w-full">
+          <div className="md:col-span-8 min-w-0 max-w-full">
+            {/* Feed */}
+            <div className="md:col-span-8">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                {/* <div className="flex flex-wrap gap-2">
+                  <ButtonLink href={makeQuery({ tab: 'latest' })} active={tab === 'latest'}>
+                    Latest
+                  </ButtonLink>
+                  <ButtonLink href={makeQuery({ tab: 'popular' })} active={tab === 'popular'} icon={<Flame className="mr-2 h-4 w-4" />}>
+                    Popular
+                  </ButtonLink>
+                  <ButtonLink href={makeQuery({ tab: 'research', cat: 'research' })} active={tab === 'research'} icon={<FlaskConical className="mr-2 h-4 w-4" />}>
+                    Research
+                  </ButtonLink>
+                </div> */}
 
-              <div className="flex flex-wrap gap-2" id="topics">
-                <Link href={makeQuery({ cat: 'all' })}>
-                  <Badge variant={effectiveCategory === 'all' ? 'default' : 'secondary'} className="cursor-pointer">
-                    All topics
-                  </Badge>
-                </Link>
-                {CATEGORY_LABELS.map((c) => (
-                  <Link key={c.key} href={makeQuery({ cat: c.key, tab: tab === 'research' ? 'latest' : tab })}>
-                    <Badge variant={effectiveCategory === c.key ? 'default' : 'secondary'} className="cursor-pointer">
-                      {c.label}
+                <div className="flex flex-wrap gap-2" id="topics">
+                  <Link href={makeQuery({ cat: 'all' })}>
+                    <Badge variant={effectiveCategory === 'all' ? 'default' : 'secondary'} className="cursor-pointer">
+                      All topics
                     </Badge>
                   </Link>
+                  {CATEGORY_LABELS.map((c) => (
+                    <Link key={c.key} href={makeQuery({ cat: c.key, tab: tab === 'research' ? 'latest' : tab })}>
+                      <Badge variant={effectiveCategory === c.key ? 'default' : 'secondary'} className="cursor-pointer">
+                        {c.label}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {feed.map((p) => (
+                  <PostCard key={p.id} post={p as any} />
                 ))}
+
+                {feed.length === 0 && (
+                  <Card className="rounded-3xl">
+                    <CardContent className="p-6">
+                      <p className="text-sm font-medium">No posts found</p>
+                      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                        Try a different keyword or reset the topic filter.
+                      </p>
+                      <div className="mt-4 flex gap-2">
+                        <Link
+                          href="/#posts"
+                          className="inline-flex h-10 items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                        >
+                          Reset
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <Pagination
+                  page={Math.min(page, totalPages)}
+                  totalPages={totalPages}
+                  baseQuery={{
+                    q: q || undefined,
+                    cat: effectiveCategory !== 'all' ? effectiveCategory : undefined,
+                    tab: tab !== 'latest' ? tab : undefined,
+                  }}
+                />
               </div>
             </div>
 
-            <div className="mt-4 space-y-4">
-              {feed.map((p) => (
-                <PostCard key={p.id} post={p as any} />
-              ))}
+            {/* Sidebar */}
+            <aside className="md:col-span-4 min-w-0 max-w-full">
+              <div className="sticky top-[78px] space-y-4">
+                <Card className="rounded-3xl overflow-hidden">
+                  <div className="h-24 bg-gradient-to-br from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-300" />
+                  <CardHeader className="pb-2">
+                    <CardTitle>Start here</CardTitle>
+                    <CardDescription>The essentials: routine, progression, recovery.</CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Link
+                      href={feedSource[0] ? `/posts/${feedSource[0].slug}` : '/#posts'}
+                      className="inline-flex h-10 w-full items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                    >
+                      Read the guide <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </CardFooter>
+                </Card>
 
-              {feed.length === 0 && (
                 <Card className="rounded-3xl">
-                  <CardContent className="p-6">
-                    <p className="text-sm font-medium">No posts found</p>
-                    <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                      Try a different keyword or reset the topic filter.
-                    </p>
-                    <div className="mt-4 flex gap-2">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Trending</CardTitle>
+                    <CardDescription>What readers open most</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {trending.map((t) => (
                       <Link
-                        href="/#posts"
-                        className="inline-flex h-10 items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                        key={t.id}
+                        href={`/posts/${t.slug}`}
+                        className="group flex items-start justify-between gap-3"
+                        prefetch={false}
                       >
-                        Reset
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium group-hover:underline underline-offset-4">
+                            {t.title}
+                          </div>
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400">{(t as any).readTime}</p>
+                        </div>
+
+                        <span className="shrink-0 text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200" aria-hidden>
+                          →
+                        </span>
                       </Link>
-                    </div>
+                    ))}
                   </CardContent>
                 </Card>
-              )}
 
-              <Pagination
-                page={Math.min(page, totalPages)}
-                totalPages={totalPages}
-                baseQuery={{
-                  q: q || undefined,
-                  cat: effectiveCategory !== 'all' ? effectiveCategory : undefined,
-                  tab: tab !== 'latest' ? tab : undefined,
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <aside className="md:col-span-4">
-            <div className="sticky top-[78px] space-y-4">
-              <Card className="rounded-3xl overflow-hidden">
-                <div className="h-24 bg-gradient-to-br from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-300" />
-                <CardHeader className="pb-2">
-                  <CardTitle>Start here</CardTitle>
-                  <CardDescription>The essentials: routine, progression, recovery.</CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Link
-                    href={feedSource[0] ? `/posts/${feedSource[0].slug}` : '/#posts'}
-                    className="inline-flex h-10 w-full items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                  >
-                    Read the guide <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </CardFooter>
-              </Card>
-
-              <Card className="rounded-3xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Trending</CardTitle>
-                  <CardDescription>What readers open most</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {trending.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <Link href={`/posts/${t.slug}`} className="truncate text-sm font-medium hover:underline underline-offset-4">
-                          {t.title}
-                        </Link>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400">{(t as any).readTime}</p>
-                      </div>
-                      <span className="text-zinc-400" aria-hidden>
-                        →
-                      </span>
+                <Card id="newsletter" className="rounded-3xl">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Newsletter</CardTitle>
+                    <CardDescription>Weekly highlights + best new posts.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                      <Input className="h-11 pl-9" placeholder="you@example.com" aria-label="Email" />
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                    <Button className="h-11 w-full">Subscribe</Button>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400">Unsubscribe anytime.</p>
+                  </CardContent>
+                </Card>
 
-              <Card id="newsletter" className="rounded-3xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Newsletter</CardTitle>
-                  <CardDescription>Weekly highlights + best new posts.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                    <Input className="h-11 pl-9" placeholder="you@example.com" aria-label="Email" />
-                  </div>
-                  <Button className="h-11 w-full">Subscribe</Button>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Unsubscribe anytime.</p>
-                </CardContent>
-              </Card>
-
-              <Card id="about" className="rounded-3xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">About</CardTitle>
-                  <CardDescription>What this blog is (and isn’t)</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
-                  <p>Evidence-based fitness content: study summaries, training frameworks, and programs you can run.</p>
-                  <p className="text-xs text-zinc-500">Educational content only, not medical advice.</p>
-                </CardContent>
-              </Card>
-            </div>
-          </aside>
+                <Card id="about" className="rounded-3xl">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">About</CardTitle>
+                    <CardDescription>What this blog is (and isn’t)</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+                    <p>Evidence-based fitness content: study summaries, training frameworks, and programs you can run.</p>
+                    <p className="text-xs text-zinc-500">Educational content only, not medical advice.</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
     </div>
