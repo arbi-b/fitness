@@ -19,6 +19,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8427240368416109"
           crossOrigin="anonymous"
         />
+
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-XWCNGEWRQN"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XWCNGEWRQN');
+          `}
+        </Script>
+
       </head>
 
       <body className="overflow-x-hidden">
