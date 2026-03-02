@@ -85,7 +85,9 @@ export default async function Home({
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                  A blog for training smarter—<span className="underline decoration-zinc-300 dark:decoration-zinc-700">not louder</span>.
+                  
+                  A blog for training smarter. 
+                  Everything You Need About FITNESS
                 </h1>
                 <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                   Study breakdowns, programs, and practical lifting advice.

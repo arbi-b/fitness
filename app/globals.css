@@ -19,3 +19,7 @@ a:focus-visible {
   box-shadow: 0 0 0 3px rgba(161, 161, 170, 0.6);
   border-radius: 0.75rem;
 }
+
+h1, h2, h3 {
+  font-family: var(--font-serif);
+}

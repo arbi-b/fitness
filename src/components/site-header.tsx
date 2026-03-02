@@ -2,18 +2,25 @@ import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200/60 bg-white/75 backdrop-blur dark:border-zinc-800/60 dark:bg-zinc-950/70">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
-            <Sparkles className="h-5 w-5" />
-          </div>
+          {/* <div className="relative h-20 w-20 overflow-hidden rounded-2xl bg-white dark:bg-white">
+            <Image
+              src="/logo.png"
+              alt="MuscleLogic logo"
+              fill
+              className="object-contain p-1"
+              priority
+            />
+          </div> */}
           <div className="leading-tight">
-            <p className="text-sm font-semibold tracking-tight">EvidenceFit</p>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400">Studies + practical training</p>
+            <p className="text-sm font-semibold tracking-tight">MuscleLogic</p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">Studies and Practical Training</p>
           </div>
         </Link>
 
@@ -37,12 +44,7 @@ export function SiteHeader() {
           <Button variant="secondary" className="hidden md:inline-flex">
             Subscribe
           </Button>
-          <Link
-            href="/#posts"
-            className="inline-flex h-10 items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
-            Start reading
-          </Link>
+          
         </div>
       </div>
     </header>

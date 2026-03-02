@@ -3,15 +3,29 @@ import './globals.css';
 import Script from 'next/script';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { Manrope, DM_Serif_Display } from 'next/font/google';
+
+const sans = Manrope({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const serif = DM_Serif_Display({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-serif',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'EvidenceFit — Fitness Blog',
+  title: 'MuscleLogic-Fitness Blog',
   description: 'Evidence-based fitness: studies, programs, and practical tips.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`${sans.variable} ${serif.variable} scroll-smooth`}>
       <head>
         <meta name="google-adsense-account" content="ca-pub-8427240368416109" />
         <script
@@ -36,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       </head>
 
-      <body className="overflow-x-hidden">
+      <body className="font-sans overflow-x-hidden">
         <SiteHeader />
         <main className="mx-auto max-w-6xl px-4">{children}</main>
         <SiteFooter />
