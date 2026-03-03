@@ -38,13 +38,11 @@ export function SiteHeader() {
             About
           </Link>
         </nav>
-
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button variant="secondary" className="hidden md:inline-flex">
-            Subscribe
+          <Button asChild variant="secondary" className="hidden md:inline-flex">
+            <Link href="/subscribe">Subscribe</Link>
           </Button>
-          
         </div>
       </div>
     </header>
