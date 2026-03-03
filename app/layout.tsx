@@ -19,6 +19,11 @@ const serif = DM_Serif_Display({
 });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png" },
+    ],
+  }, 
   title: 'MuscleLogic-Fitness Blog',
   description: 'Evidence-based fitness: studies, programs, and practical tips.',
 };
