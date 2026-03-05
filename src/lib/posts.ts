@@ -29,6 +29,72 @@ function normalizeCategory(cat?: string) {
   return c;
 }
 
+/**
+ * Cursor-based pagination for "Load more"
+ * Cursor format: "YYYY-MM-DD|id"
+ */
+export async function listPublishedPostsPage(opts?: { limit?: number; cursor?: string }) {
+  const limit = Math.min(Math.max(opts?.limit ?? 6, 1), 24);
+  const cursor = (opts?.cursor || '').trim();
+
+  let cursorDate = '';
+  let cursorId = '';
+
+  if (cursor.includes('|')) {
+    const [d, id] = cursor.split('|');
+    cursorDate = (d || '').trim();
+    cursorId = (id || '').trim();
+  }
+
+  const { rows } =
+    cursorDate && cursorId
+      ? await sql<Post>`
+          SELECT
+            id,
+            slug,
+            title,
+            excerpt,
+            category,
+            tags,
+            cover_image AS "coverImage",
+            status,
+            to_char(published_at, 'YYYY-MM-DD') AS "publishedAt",
+            content
+          FROM posts
+          WHERE status = 'published'
+            AND (
+              (published_at < ${cursorDate}::date)
+              OR (published_at = ${cursorDate}::date AND id < ${cursorId})
+            )
+          ORDER BY published_at DESC, id DESC
+          LIMIT ${limit};
+        `
+      : await sql<Post>`
+          SELECT
+            id,
+            slug,
+            title,
+            excerpt,
+            category,
+            tags,
+            cover_image AS "coverImage",
+            status,
+            to_char(published_at, 'YYYY-MM-DD') AS "publishedAt",
+            content
+          FROM posts
+          WHERE status = 'published'
+          ORDER BY published_at DESC, id DESC
+          LIMIT ${limit};
+        `;
+
+  const posts = rows.map(withDerived);
+
+  const last = rows[rows.length - 1];
+  const nextCursor = last ? `${(last as any).publishedAt}|${last.id}` : null;
+
+  return { posts, nextCursor };
+}
+
 export async function listPosts(opts?: {
   includeDrafts?: boolean;
   category?: string;
@@ -42,7 +108,6 @@ export async function listPosts(opts?: {
 
   const order = (opts?.sort ?? 'newest') === 'oldest' ? 'ASC' : 'DESC';
 
-  // Two queries only to keep ORDER BY simple & safe
   const { rows } =
     order === 'ASC'
       ? await sql<Post>`
@@ -151,7 +216,7 @@ async function ensureUniqueSlug(id: string, baseSlug: string) {
 }
 
 export async function upsertPost(id: string, input: PostInput): Promise<Post> {
-  const baseSlug = (input.slug && input.slug.trim()) ? slugify(input.slug) : slugify(input.title);
+  const baseSlug = input.slug && input.slug.trim() ? slugify(input.slug) : slugify(input.title);
   const slug = await ensureUniqueSlug(id, baseSlug);
 
   const publishedAt = input.publishedAt || new Date().toISOString().slice(0, 10);
@@ -166,7 +231,8 @@ export async function upsertPost(id: string, input: PostInput): Promise<Post> {
       ${input.title},
       ${input.excerpt},
       ${input.category},
-      ${(input.tags ?? []) as unknown as any},      ${input.coverImage || null},
+      ${(input.tags ?? []) as unknown as any},
+      ${input.coverImage || null},
       ${input.status},
       ${publishedAt}::date,
       ${input.content},
