@@ -11,7 +11,7 @@ export function SiteHeader() {
         <Link href="/" className="flex items-center gap-2">
           <div className="relative h-20 w-20 overflow-hidden rounded-2xl bg-white dark:bg-white">
             <Image
-              src="/favicon-32x32 (1).png"
+              src="/favicon-32x32-1.png"
               alt="MuscleLogic logo"
               fill
               className="object-contain p-1"
