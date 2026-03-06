@@ -1,35 +1,11 @@
-"use client";
+// app/subscribe/[token]/page.tsx
+import ConfirmClient from "./confirm-client";
 
-import { useEffect, useState } from "react";
-
-export default function SubscribeConfirmPage({
+export default async function Page({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
-  const [message, setMessage] = useState("Confirming your subscription...");
-
-  useEffect(() => {
-    const token = params.token;
-
-    if (!token || token === "invalid") {
-      setMessage("Invalid confirmation link.");
-      return;
-    }
-
-    const run = async () => {
-      const res = await fetch(`/api/confirm?token=${encodeURIComponent(token)}`);
-      if (res.ok) setMessage("Email confirmed! You are now subscribed.");
-      else setMessage("Confirmation failed (link invalid or expired).");
-    };
-
-    run().catch(() => setMessage("Confirmation failed. Please try again."));
-  }, [params.token]);
-
-  return (
-    <div className="mx-auto max-w-md py-12">
-      <h1 className="text-2xl font-semibold">Subscription Confirmation</h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{message}</p>
-    </div>
-  );
+  const { token } = await params;
+  return <ConfirmClient token={token} />;
 }
