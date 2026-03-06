@@ -23,3 +23,5 @@ a:focus-visible {
 h1, h2, h3 {
   font-family: var(--font-serif);
 }
+
+html { scroll-padding-top: 100px; }
