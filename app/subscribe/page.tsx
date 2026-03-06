@@ -18,7 +18,7 @@ export default function SubscribePage() {
 
     setStatus(res.ok ? "done" : "error");
   }
-
+//vyoo yoo
   return (
     <div className="mx-auto max-w-md py-12">
       <h1 className="text-2xl font-semibold">Newsletter</h1>
