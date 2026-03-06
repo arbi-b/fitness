@@ -168,7 +168,9 @@ export default async function Home({
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                   <Input className="h-11 pl-9" placeholder="you@example.com" aria-label="Email" />
                 </div>
-                <Button className="h-11 w-full">Subscribe</Button>
+                <Button asChild className="h-11 w-full">
+                  <Link href="/subscribe">Subscribe</Link>
+                </Button>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400">Unsubscribe anytime.</p>
               </CardContent>
             </Card>

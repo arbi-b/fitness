@@ -28,11 +28,11 @@ export function SiteHeader() {
           <Link className="text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white" href="/#posts">
             Posts
           </Link>
-          <Link className="text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white" href="/#topics">
-            Topics
+          <Link className="text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white" href="/?cat=programs&tab=latest#posts">
+            Programs
           </Link>
-          <Link className="text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white" href="/#newsletter">
-            Newsletter
+          <Link className="text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white" href="/?cat=nutrition&tab=latest#posts">
+            Nutrition
           </Link>
           <Link className="text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white" href="/#about">
             About
