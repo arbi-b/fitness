@@ -88,7 +88,7 @@ export default async function Home({
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-2xl mt-3 font-semibold tracking-tight md:text-3xl">
-                  A blog for training smarter. Everything You Need About FITNESS
+                  Evidence-Based Hypertrophy, Nutrition, and Training Programs
                 </h1>
                 <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                   Study breakdowns, programs, and practical lifting advice.
@@ -199,7 +199,7 @@ export default async function Home({
                 </CardHeader>
                 <CardFooter>
                   <Link
-                    href={feedSource[0] ? `/posts/${feedSource[0].slug}` : "/#posts"}
+                    href="https://musclelogic.blog/posts/starting-fitness-or-first-time-in-gym-this-is-everything-you-need-to-know"
                     className="inline-flex h-10 w-full items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
                   >
                     Read the guide <ArrowRight className="ml-2 h-4 w-4" />

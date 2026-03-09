@@ -4,6 +4,7 @@ import Script from 'next/script';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { Manrope, DM_Serif_Display } from 'next/font/google';
+import { Analytics } from "@vercel/analytics/next"
 
 const sans = Manrope({
   subsets: ['latin'],
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         <main className="mx-auto max-w-6xl px-4">{children}</main>
         <SiteFooter />
+        <Analytics />
       </body>
     </html>
   );
