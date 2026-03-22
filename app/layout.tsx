@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { Manrope, DM_Serif_Display } from 'next/font/google';
 import { Analytics } from "@vercel/analytics/next"
+import CookieBanner from '@/components/cookie-banner';
 
 const sans = Manrope({
   subsets: ['latin'],
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body className="font-sans overflow-x-hidden">
+        <CookieBanner />
         <SiteHeader />
         <main className="mx-auto max-w-6xl px-4">{children}</main>
         <SiteFooter />

@@ -7,8 +7,11 @@ export function SiteFooter() {
         <p>© {new Date().getFullYear()} MuscleLogic. Built for clarity.</p>
         <div className="flex flex-wrap gap-4">
           <Link className="hover:text-zinc-900 dark:hover:text-white" href="/#posts">Posts</Link>
-          <Link className="hover:text-zinc-900 dark:hover:text-white" href="/#topics">Topics</Link>
           <Link className="hover:text-zinc-900 dark:hover:text-white" href="/#newsletter">Newsletter</Link>
+          <Link className="hover:text-zinc-900 dark:hover:text-white" href="/about">About</Link>
+          <Link className="hover:text-zinc-900 dark:hover:text-white" href="/terms">Terms and Conditions</Link>
+          <Link className="hover:text-zinc-900 dark:hover:text-white" href="/privacy">Privacy Policy</Link>
+          <Link className="hover:text-zinc-900 dark:hover:text-white" href="/disclaimer">Disclaimer</Link>
         </div>
       </div>
     </footer>
